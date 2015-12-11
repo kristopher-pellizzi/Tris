@@ -22,15 +22,15 @@ def partita(giocatore1, giocatore2):
 				vittoria=check_tris(m)
 			giocatore=inverti_giocatore(giocatore)
 		if vittoria:
-			print("Ha vinto il giocatore ", inverti_giocatore(giocatore))
-			vittorie[inverti_giocatore(giocatore)-1]+=1
+			print("Ha vinto il giocatore ", giocatore)
+			vittorie[giocatore-1]+=1
 		else:
 			print("pareggio")
 		sleep(5)
 		print("")
 
 	for i in range(2):
-		print("Il giocatore ",i+1," ha vinto ",vittorie[i]," volte")
+		print("Il giocatore ",i+1," ha vinto ",vittorie[i]," volte\n")
 
 def stampa_matrice(m):
 	print("")
