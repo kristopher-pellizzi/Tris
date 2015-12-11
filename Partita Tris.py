@@ -22,8 +22,8 @@ def partita(giocatore1, giocatore2):
 				vittoria=check_tris(m)
 			giocatore=inverti_giocatore(giocatore)
 		if vittoria:
-			print("Ha vinto il giocatore ", giocatore)
-			vittorie[giocatore-1]+=1
+			print("Ha vinto il giocatore ", vittoria)
+			vittorie[vittoria-1]+=1
 		else:
 			print("pareggio")
 		sleep(5)
@@ -166,19 +166,19 @@ def check_set(lista):
 def check_rows(m):
 	for i in range(3):
 		if check_set(riga(m,i)):
-			return True
+			return check_set(riga(m,i))
 	return False
 
 def check_columns(m):
 	for i in range(3):
 		if check_set(colonna(m,i)):
-			return True
+			return check_set(colonna(m,i))
 	return False
 
 def check_diag(m):
 	for i in range(3):
 		if (check_set(diag_p(m)) or check_set(diag_s(m))):
-			return True
+			return (check_set(diag_p(m)) or check_set(diag_s(m)))
 	return False
 
 def check_tris(m):
