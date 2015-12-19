@@ -1,8 +1,10 @@
+from random import randint
+
 def partita(giocatore1, giocatore2):
 	giocatori=[giocatore1, giocatore2]
 	N=3
 	crea_matrice(N)
-	numero_partite=6
+	numero_partite=2
 	giocatore_iniziale=1
 	vittorie=[0,0]
 	for x in range(numero_partite):
@@ -48,103 +50,155 @@ def inverti_giocatore(x):
 def crea_matrice(n):
 	return [[0 for _ in range(n)] for _ in range(n)]
 
-def giocatore1(mat,g):
-	if num_mosse(mat) in (0,1):
-		i=1
-		j=1
-		if mat[i][j]==0:
-			return (i,j)
+def blocca_tenaglia(mat,g):
+	for i in (0,2):
+		for j in (0,2):
+			if (mat[i][j]!=0 and mat[i][j]!=g):
+				return 2-i,2-j
+
+def mossa_centr(mat,i,j):
+    if mat[i][j]==0:
+            return(i,j)
+
+def mossa_ang(mat):
+	i=randint(0,2)
+	j=randint(0,2)
+	while (mat[i][j]!=0 or i==1 or j==1):
+		i=randint(0,2)
+		j=randint(0,2)
+	return i,j
+
+def mossa_iniz(mat,g):
+	i=1
+	j=1
+	k=randint(0,1)
+	if k==0:
+		if mossa_centr(mat,i,j)!=None:
+			return mossa_centr(mat,i,j)
 		else:
+			return mossa_ang(mat)
+	else:
+		return mossa_ang(mat)
+
+def mossa3(mat,g):
+	for i in (0,2):
+		for j in (0,2):
+			if (mat[i][j]==g and mat[2-i][2-j]==0):
+				return 2-i,2-j
+	if mat[1][1]==g:
+		for i in (0,2):
+			for j in (0,2):
+				if mat[i][j]==0:
+					return i,j
+	else:
+		for i in range(3):
+			for j in range(3):
+				if mat[i][j]==g:
+					r=riga(mat,i)
+					c=colonna(mat,j)
+					break
+		if len(set(r))==2:
+			return (i,2-j)
+		else:
+			return 2-i,j
+
+def ultima_mossa(mat,g):
+	for i in range(3):
+		for j in range(3):
+			if mat[i][j]==0:
+				return i,j
+
+def chiudi_diag(mat,g):
+	if (len(set(diag_p(mat)))==2 and sorted(diag_p(mat))[0]==0 and num_mosse_terna(diag_p(mat))==2):
+		for i in range(3):
+			if mat[i][i]==0:
+				return i,i
+	if (len(set(diag_s(mat)))==2 and sorted(diag_s(mat))[0]==0 and num_mosse_terna(diag_s(mat))==2):
+		for i in range(3):
+			if mat[i][2-i]==0:
+				return i,2-i
+
+def chiudi_rc(mat,g,i,j):
+	r=riga(mat,i)
+	c=colonna(mat,j)
+	if(len(set(r))==2 and sorted(r)[0]==0 and num_mosse_terna(r)==2):
+		return i,blocca(r)
+	if(len(set(c))==2 and sorted(c)[0]==0 and num_mosse_terna(c)==2):
+		return blocca(c),j
+
+def continua(mat,g):
+	i=0
+	for j in (0,2):
+		if (mat[i][j]==g and mat[2][2-j]==g):
 			for i in (0,2):
 				for j in (0,2):
+					r=riga(mat,i)
+					c=colonna(mat,j)
 					if mat[i][j]==0:
-						return(i,j)
+						if (len(set(r))==2 and len(set(c))==2 and sorted(r)[0]==0 and sorted(c)[0]==0):
+							return i,j
+
+	if mat[1][1]==g:
+		if(len(set(diag_p(mat)))==2 and sorted(diag_p(mat))[0]==0):
+			for i in range(3):
+				if mat[i][i]==0:
+					return i,i
+		if(len(set(diag_s(mat)))==2 and sorted(diag_s(mat))[0]==0):
+			for i in range(3):
+				if mat[i][2-i]==0:
+					return i,2-i
+	for i in range(3):
+		for j in range(3):
+			if mat[i][j]==g:
+				r=riga(mat,i)
+				c=colonna(mat,j)
+				if(len(set(r))==2 and sorted(r)[0]==0):
+					return i,blocca(r)
+				if(len(set(c))==2 and sorted(c)[0]==0):
+					return blocca(c),j
+	for i in range(3):
+		for j in range(3):
+			if mat[i][j]==g:
+				r=riga(mat,i)
+				c=colonna(mat,j)
+				if sorted(r)[0]==0:
+					for k in range(3):
+						if r[k]==0:
+							return i,k
+				if sorted(c)[0]==0:
+					for k in range(3):
+						if c[k]==0:
+							return k,j
+
+def giocatore1(mat,g):
+	if num_mosse(mat)==0:
+		return mossa_iniz(mat,g)
+
+	if num_mosse(mat)==1:
+		if blocca_tenaglia(mat,g)!=None:
+			return blocca_tenaglia(mat,g)
+		return mossa_iniz(mat,g)
 
 	if num_mosse(mat)==2:
-		if mat[1][1]==g:
-			for i in (0,2):
-				for j in (0,2):
-					if mat[i][j]==0:
-						return (i,j)
-		else:
-			for i in range(3):
-				for j in range(3):
-					if mat[i][j]==g:
-						r=riga(mat,i)
-						c=colonna(mat,j)
-						break
-			if len(set(r))==2:
-				return (i,2-j)
-			else:
-				return (2-i,j)
+		return mossa3(mat,g)
 
 	if num_mosse(mat) in (3,4,5,6,7):
-		if mat[1][1]==g:
-			if (len(set(diag_p(mat)))==2 and sorted(diag_p(mat))[0]==0 and num_mosse_terna(diag_p(mat))==2):
-				for i in range(3):
-					if mat[i][i]==0:
-						return (i,i)
-			
-			if (len(set(diag_s(mat)))==2 and sorted(diag_s(mat))[0]==0 and num_mosse_terna(diag_s(mat))==2):
-				for i in range(3):
-					if mat[i][2-i]==0:
-						return (i,2-i)
+		if chiudi_diag(mat,g)!=None:
+			return chiudi_diag(mat,g)
 		for i in range(3):
 			for j in range(3):
 				if mat[i][j]==g:
-					r=riga(mat,i)
-					c=colonna(mat,j)
-					if(len(set(r))==2 and sorted(r)[0]==0 and num_mosse_terna(r)==2):
-						return (i,blocca(r))
-						
-					if(len(set(c))==2 and sorted(c)[0]==0 and num_mosse_terna(c)==2):
-						return (blocca(c),j)
-		if (mat[1][1]!=0 and mat[1][1]!=g):
-			if (len(set(diag_p(mat)))==2 and sorted(diag_p(mat))[0]==0 and num_mosse_terna(diag_p(mat))==2):
-				for i in range(3):
-					if mat[i][i]==0:
-						return (i,i)
-			
-			if (len(set(diag_s(mat)))==2 and sorted(diag_s(mat))[0]==0 and num_mosse_terna(diag_s(mat))==2):
-				for i in range(3):
-					if mat[i][2-i]==0:
-						return (i,2-i)
+					if chiudi_rc(mat,g,i,j)!=None:
+						return chiudi_rc(mat,g,i,j)
 		for i in range(3):
 			for j in range(3):
-				if (mat[i][j]!=0 and mat[i][j]!=g):
-					r=riga(mat,i)
-					c=colonna(mat,j)
-					if(len(set(r))==2 and sorted(r)[0]==0 and num_mosse_terna(r)==2):
-						return (i,blocca(r))
-						
-					if(len(set(c))==2 and sorted(c)[0]==0 and num_mosse_terna(c)==2):
-						return (blocca(c),j)
-		if mat[1][1]==g:
-			if (len(set(diag_p(mat)))==2 and sorted(diag_p(mat))[0]==0):
-				for i in range(3):
-					if mat[i][i]==0:
-						return (i,i)
-			
-			if (len(set(diag_s(mat)))==2 and sorted(diag_s(mat))[0]==0):
-				for i in range(3):
-					if mat[i][2-i]==0:
-						return (i,2-i)
-		for i in range(3):
-			for j in range(3):
-				if mat[i][j]==g:
-					r=riga(mat,i)
-					c=colonna(mat,j)
-					if(len(set(r))==2 and sorted(r)[0]==0):
-						return (i,blocca(r))
-						
-					if(len(set(c))==2 and sorted(c)[0]==0):
-						return (blocca(c),j)
+				if (mat[i][j]!=0 and mat[i][i]!=g):
+					if chiudi_rc(mat,g,i,j)!=None:
+						return chiudi_rc(mat,g,i,j)
+		return continua(mat,g)
 
 	if num_mosse(mat)==8:
-		for i in range(3):
-			for j in range(3):
-				if mat[i][j]==0:
-					return(i,j)
+		return ultima_mossa(mat,g)
 
 def giocatore2(mat,g):
 	i=eval(input("Inserisci la prima coordinata (numero di riga da 0 a 2): "))
